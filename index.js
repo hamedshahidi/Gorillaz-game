@@ -25,6 +25,8 @@ function newGame() {
         backgroundBuildings: [],
         buildings: [],
         blastHoles: [],
+
+        scale: 1,
     };
 
     // Generate background buildings
@@ -37,6 +39,7 @@ function newGame() {
         generateBuilding(i);
     }
 
+    calculateScale();
     initializeBombPosition();
 
     draw();
@@ -46,6 +49,7 @@ function draw() {
     ctx.save();
     ctx.translate(0, window.innerHeight);
     ctx.scale(1, -1);
+    ctx.scale(state.scale, state.scale);
 
     drawBackground();
     drawBackgroundBuildings();
@@ -130,13 +134,13 @@ function initializeBombPosition() {
 
 // Drawing methods
 function drawBackground() {
-    const gradient = ctx.createLinearGradient(0,0,0,window.innerHeight);
+    const gradient = ctx.createLinearGradient(0, 0, 0, window.innerHeight / state.scale);
     gradient.addColorStop("#F8BA85");
     gradient.addColorStop("#FFC28E");
 
     // Draw sky
     ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, window.innerWidth, innerHeight);
+    ctx.fillRect(0, 0, window.innerWidth / state.scale, innerHeight / state.scale);
 
     // Draw moon
     ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
@@ -321,3 +325,17 @@ function drawBomb() {
 
     ctx.restore();
 }
+
+function calculateScale() {
+    const lastBulding = state.buildings.at(-1);
+    const totalWidthOfTheCity = lastBuilding.x + lastBulding.width;
+    state.scale = window.innerWidth / totalWidthOfTheCity;
+}
+
+window.addEventListener("resize", () => {
+    canvas.width = window.innerWidth;
+    canvas,height = window.innerHeight;
+    calculateScale();
+    initializeBombPosition();
+    draw();
+});
